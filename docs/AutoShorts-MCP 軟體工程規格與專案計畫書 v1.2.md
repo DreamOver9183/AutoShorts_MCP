@@ -4,9 +4,9 @@
 
 | 項目 | 內容 |
 | :---- | :---- |
-| **文件版本** | v1.1 |
+| **文件版本** | v1.2 |
 | **專案版本** | v0.1 (Pre-Alpha / 規格定版) |
-| **文件狀態** | Active（v1.0 已封存，見 §0.4） |
+| **文件狀態** | Active（v1.0 已封存；v1.1 起改由 git 記錄沿革，見 §0.4） |
 | **最後更新** | 2026-09-04 |
 | **版本控制** | https://github.com/DreamOver9183/AutoShorts_MCP |
 | **主要平台** | Windows 11 / Ubuntu LTS（本機執行，非容器化） |
@@ -21,7 +21,7 @@
 
 | 版本號類型 | 目前值 | 定義 | 遞增時機 |
 | :---- | :---- | :---- | :---- |
-| **文件版本 (Document Version)** | **v1.1** | 本規格書自身的修訂版次。描述「我們打算做什麼」。 | 規格內容有實質變更時遞增（如新增工具、修改 Schema、調整架構）。 |
+| **文件版本 (Document Version)** | **v1.2** | 本規格書自身的修訂版次。描述「我們打算做什麼」。 | 規格內容有實質變更時遞增（如新增工具、修改 Schema、調整架構）。 |
 | **專案版本 (Project Version)** | **v0.1** | 實際交付軟體的版本。描述「我們已經做出什麼」。 | 依 §0.2 的版本階梯，隨里程碑完成而遞增。 |
 
 > **關鍵約定**：規格書 v1.0 **不等於**專案 v1.0。規格書在專案尚未寫下第一行程式碼時即已是 v1.0；而專案版本要到「最小可行性產品 (MVP)」完成、通過 §8.4 全部驗收標準後，才正式標記為 `AutoShorts_MCP_v1.0`。
@@ -32,7 +32,7 @@
 | :---- | :---- | :---- |
 | **v0.1** | M0 — 規格定版 | 規格書 v1.1 定版、Repo 初始化、目錄結構與版控規範確立。**無可執行程式碼。** |
 | **v0.2** | M1 — 影音核心模組 | 節拍分析、音訊下載、單片段 9:16 裁切三個模組可獨立以 CLI 執行並通過單元測試。 |
-| **v0.3** | M2 — MCP 服務與 Agent | MCP Server 可被任一 MCP Client 連線，六個工具全部可呼叫，LLM 能產出通過 Schema 驗證的 EDL。 |
+| **v0.3** | M2 — MCP 服務與 Agent | MCP Server 可被任一 MCP Client 連線，七個工具全部可呼叫，LLM 能產出通過 Schema 驗證的 EDL。 |
 | **v0.4** | M3-A — 軌道 A 草稿輸出 | CapCut / 剪映草稿產生器可匯入並在目標軟體正確顯示時間軸。 |
 | **v0.5** | M3-B — 軌道 B 原生渲染 | Chunked Pipeline 可端到端產出 1080x1920 MP4，硬體編碼器自動偵測生效。 |
 | **v1.0** | M4 — MVP 驗收 | 通過 §8.4 全部驗收標準（含記憶體上限、音畫同步誤差、端到端成功率）。 |
@@ -68,7 +68,8 @@ git tag -a AutoShorts_MCP_v0.1 -m "M0: 規格書 v1.1 定版與 Repo 初始化"
 | 文件版本 | 日期 | 主要變更 |
 | :---- | :---- | :---- |
 | v1.0 | 2026-09-04 | 初版。已封存為歷史紀錄，不再維護。 |
-| **v1.1** | **2026-09-04** | 見下方變更明細。 |
+| v1.1 | 2026-09-04 | 釐清版本治理、移除供應商綁定、補齊工程章節。已由 git 記錄，不再保留獨立檔案。 |
+| **v1.2** | **2026-09-04** | **素材預處理與內容感知重構**。見下方變更明細。 |
 
 **v1.1 相對 v1.0 的變更明細**：
 
@@ -83,6 +84,19 @@ git tag -a AutoShorts_MCP_v0.1 -m "M0: 規格書 v1.1 定版與 Repo 初始化"
 9. **【新增】** §6 設定管理、§7 專案目錄結構、§8 測試策略與驗收標準、§11 授權與合規三個工程章節。
 10. **【新增】** 風險表補上四項原先遺漏的高風險項目：CapCut 草稿格式逆向工程脆弱性、librosa 無原生 downbeat 偵測能力、音樂版權與服務條款合規、Concat Demuxer 參數不一致導致拼接失敗。
 11. **【清理】** 移除 Google Docs 匯出殘留的跳脫字元（`\*`、`\_`、`\[ \]`、`\#`），程式碼與指令改用標準 fenced code block。
+
+**v1.2 相對 v1.1 的變更明細**：
+
+起因是一個實務觀察：大量素材來自**螢幕錄影**，而 v1.1 定義的三種 `reframe_mode` 對這類素材**全部失效**。經量化分析（§5.6.2），這不是美學問題而是幾何問題——現行的滿寬置入方式會讓 UI 文字縮到 9–19px，遠低於手機可讀門檻。
+
+1. **【新增】** §5.6 素材預處理與內容感知重構，本次改版的核心。內含可讀性預算模型、素材分類器、活動熱區偵測與分段靜態裁切演算法。
+2. **【新增】** §4.8 `plan_reframe` 工具（核心工具由 6 個增為 7 個）。
+3. **【擴充】** §4.3 `probe_and_sample_media` 輸出加入素材分類結果與可讀性指標。
+4. **【擴充】** §5.1 EDL 新增 `fit_height_crop`、`region_pan`、`auto` 三種重構模式與 `reframe_plan` 欄位；新增不變式 I-8。
+5. **【新增】** §6 設定新增 `[reframe]` 區段；§3.3 新增 `opencv-python-headless` 相依（本機已具備）。
+6. **【新增】** 風險 R-11（素材誤分類）、R-12（活動熱區誤導）、R-13（校準語料不足）。
+7. **【新增】** 測試案例 T-11 ~ T-15；驗收標準 A-9（螢幕錄影可讀性）。
+8. **【變更】** 文件版本管理方式：v1.1 起沿革改由 git 記錄，**不再產生平行的版本化檔案**。v1.0 暫予保留僅為支援附錄 A-6 的公式語意確認，該項結案後即可移除。
 
 ---
 
@@ -116,6 +130,7 @@ git tag -a AutoShorts_MCP_v0.1 -m "M0: 規格書 v1.1 定版與 Repo 初始化"
 
 * 音訊自動下載、轉碼與節拍點偵測（BPM、Beat Timestamps、Downbeats）。
 * 媒體素材規格探測（FFprobe）與輕量化低解析度抽樣（防止 OOM）。
+* **素材預處理與內容感知重構**：素材類型分類（自然影片／螢幕錄影／簡報）、活動熱區偵測、可讀性預算評估，以及依熱區推導的分段靜態裁切（§5.6）。
 * LLM 語意分析生成標準剪輯決定表（Edit Decision List, EDL）。
 * **雙軌輸出架構**：
   * **軌道 A（極速草稿）**：輸出 CapCut / 剪映本機工程檔（`draft_content.json`），提供無損即時微調。
@@ -126,6 +141,7 @@ git tag -a AutoShorts_MCP_v0.1 -m "M0: 規格書 v1.1 定版與 Repo 初始化"
 * 雲端多租戶 SaaS 平台維運。
 * 複雜的 3D 特效合成與深度神經網路面部重構。
 * 語音辨識（ASR）自動字幕生成 — 列為 v1.x 後續候選（見附錄 A-4）。
+* **重構模式 `stacked_context`（上下雙窗格佈局）與 `auto_track`（逐幀平移追蹤）** — 經 §5.6.5 評估後排除於 v1.0，列為 v1.x 候選（見附錄 A-9）。
 * 素材的版權清算與授權管理 — 由使用者自行負責（見 §11.3）。
 
 ### 1.4 名詞定義 (Glossary)
@@ -137,6 +153,9 @@ git tag -a AutoShorts_MCP_v0.1 -m "M0: 規格書 v1.1 定版與 Repo 初始化"
 | **Chunk** | 渲染管線中的最小獨立處理單元，對應 EDL timeline 中的一個 clip，由獨立子進程處理。 |
 | **Reframe** | 將非 9:16 素材適配至 1080x1920 畫布的策略（模糊填充／中央裁切／Ken Burns 縮放）。 |
 | **Snapping** | 節拍吸附。將 LLM 估算的鏡頭長度校正至最接近的節拍點，確保切點對齊音樂。 |
+| **活動熱區 (Activity Heatmap)** | 由相鄰畫格差分累積而得的空間分布圖，用於推定螢幕錄影中「使用者正在操作的區域」。見 §5.6.4。 |
+| **可讀性預算 (Legibility Budget)** | 描述「原始文字高度」經重構後於 1080x1920 輸出中所剩字高的量化模型。見 §5.6.2。 |
+| **分段靜態裁切 (Piecewise-Static Crop)** | v1.0 採用的內容感知重構方案：將素材依活動熱區切成數段，每段用固定裁切矩形，段落邊界對齊節拍。見 §5.6.5。 |
 | **MVP** | Minimum Viable Product，最小可行性產品。本專案定義見 §8.4。 |
 
 ---
@@ -157,7 +176,8 @@ flowchart TD
     subgraph S["AutoShorts-MCP Server 核心"]
         T1["Tool 1: download_music<br/>音訊擷取 → 標準 WAV 44.1kHz/16-bit"]
         T2["Tool 2: analyze_audio_beats<br/>Onset · Tempo(BPM) · Beat 時間戳"]
-        T3["Tool 3: probe_and_sample_media<br/>FFprobe 探測 + 360p 縮圖抽樣"]
+        T3["Tool 3: probe_and_sample_media<br/>FFprobe 探測 + 360p 縮圖抽樣<br/>+ 素材分類 (§5.6.3)"]
+        T7["Tool 7: plan_reframe<br/>活動熱區偵測 · 可讀性預算<br/>分段靜態裁切 (§5.6)"]
         T6["Tool 6: probe_system_capabilities<br/>硬體編碼器 / FFmpeg 能力偵測"]
         T4["Tool 4 & 5: EDL Engine<br/>Schema 驗證 + Beat Snapping"]
     end
@@ -200,7 +220,7 @@ flowchart TD
 | **Vision（多圖輸入）** | 單次請求可接收 ≥ 60 張 360p 影像 | 讀取 §4.3 產出的素材縮圖，判斷畫面內容與可用性 |
 | **結構化輸出** | 支援 JSON Schema 約束解碼，或至少能穩定產出合法 JSON | 產出符合 §5.1 EDL Schema 的輸出 |
 | **長上下文** | ≥ 128K tokens | 同時容納素材清單、節拍網格與 System Prompt |
-| **Tool / Function Calling** | 支援 MCP 標準工具呼叫 | 驅動 §4 的六個工具 |
+| **Tool / Function Calling** | 支援 MCP 標準工具呼叫 | 驅動 §4 的七個工具 |
 
 **2.3.2 轉接層介面**
 
@@ -309,6 +329,8 @@ ffmpeg -hide_banner -loglevel error -f lavfi -i testsrc2=size=1080x1920:rate=30 
 | `librosa` | `>=0.10.2` | 音訊訊號處理與節拍萃取 |
 | `yt-dlp` | `>=2024.08.06` | 影音串流擷取（此套件更新極頻繁，建議不鎖上限） |
 | `pydantic` | `>=2.7.0` | 資料模型與 Schema 驗證 |
+| `opencv-python-headless` | `>=4.10.0` | §5.6 素材分類、活動熱區偵測與文字區塊估計。選 headless 版避免拉入 GUI 相依 |
+| `numpy` | `>=1.26.0` | 熱區差分運算（亦為 librosa / opencv 的傳遞相依，此處顯式宣告） |
 | `psutil` | `>=5.9.0` | 渲染期記憶體監控與 §8.4 驗收量測 |
 | `typer` | `>=0.12.0` | CLI 介面 |
 
@@ -327,6 +349,8 @@ LLM 供應商 SDK 一律列為 optional extras，見 §2.3.2。
 | Python | 3.12.10 | ✅ 在支援區間內 |
 | FFmpeg / FFprobe | **尚未安裝** | ⚠️ **M1 前置阻擋項** |
 | yt-dlp | 尚未安裝 | 由 pip 相依安裝，非阻擋項 |
+| opencv-python-headless | 5.0.0.93 | ✅ 已具備，§5.6 前處理無須額外重量級相依 |
+| numpy | 2.3.5 | ✅ 已具備 |
 
 > **行動項**：FFmpeg 缺席是 M1 的硬性前置條件。M1 的第一項工作即為建立環境檢查腳本並完成 FFmpeg 安裝與能力驗證（見 §10 M1）。
 >
@@ -336,7 +360,7 @@ LLM 供應商 SDK 一律列為 optional extras，見 §2.3.2。
 
 ## 4. MCP 工具介面規格 (MCP Tool Specifications)
 
-MCP Server 需實作並向 LLM Client 暴露下列 **6 個**原子化核心工具。
+MCP Server 需實作並向 LLM Client 暴露下列 **7 個**原子化核心工具。
 
 ### 4.1 `download_music`
 
@@ -465,7 +489,45 @@ MCP Server 需實作並向 LLM Client 暴露下列 **6 個**原子化核心工�
       "thumbnails": [
         "D:/.../workspace/thumbs/DJI_0042_00.jpg",
         "D:/.../workspace/thumbs/DJI_0042_01.jpg"
-      ]
+      ],
+      "content_analysis": {
+        "content_class": "natural",
+        "confidence": 0.91,
+        "signals": {
+          "axis_edge_ratio": 0.18,
+          "color_sparsity": 0.21,
+          "temporal_static_ratio": 0.12,
+          "text_block_density": 0.02
+        },
+        "text_height_fraction": null,
+        "static_border": null,
+        "reframe_recommendation": "center_crop"
+      }
+    },
+    {
+      "file_path": "D:/.../inputs/screen_rec_01.mp4",
+      "source_type": "video",
+      "duration": 128.5,
+      "width": 1920,
+      "height": 1080,
+      "aspect_ratio": "16:9",
+      "fps": 30.0,
+      "codec": "h264",
+      "rotation": 0,
+      "thumbnails": ["..."],
+      "content_analysis": {
+        "content_class": "screen_recording",
+        "confidence": 0.88,
+        "signals": {
+          "axis_edge_ratio": 0.52,
+          "color_sparsity": 0.74,
+          "temporal_static_ratio": 0.83,
+          "text_block_density": 0.31
+        },
+        "text_height_fraction": 0.0176,
+        "static_border": { "x": 0, "y": 0, "w": 1920, "h": 1032 },
+        "reframe_recommendation": "auto"
+      }
     }
   ],
   "skipped": [
@@ -478,6 +540,9 @@ MCP Server 需實作並向 LLM Client 暴露下列 **6 個**原子化核心工�
   * 縮圖使用 `scale=360:-2`（`-2` 而非 `-1`，確保高度為偶數以相容編碼器）。
   * 必須讀取並回報 `rotation` 中繼資料——手機直拍影片常帶旋轉旗標，忽略將導致渲染畫面躺平。
   * 無法探測的檔案列入 `skipped` 並繼續處理其餘素材，**不得整批中止**。
+  * `content_analysis` 依 §5.6.3 計算，全部在已抽出的縮圖上完成，**不重新解碼原始素材**。
+  * `text_height_fraction`（§5.6.2 的 φ）僅對含文字的素材估計，無法估計時填 `null`。
+  * `content_class` 信心值低於 `[reframe] classify_min_confidence` 時填 `"unknown"`，交由 LLM 或使用者指定。
 
 ### 4.4 `export_capcut_draft`（軌道 A）
 
@@ -617,6 +682,82 @@ MCP Server 需實作並向 LLM Client 暴露下列 **6 個**原子化核心工�
 
 `retryable: true` 表示 LLM 可在調整參數後重試；`false` 表示需要使用者介入。
 
+### 4.8 `plan_reframe`（v1.2 新增）
+
+* **功能描述**：針對單一素材的指定時間區段，計算內容感知的重構方案——輸出分段時間表、每段的裁切矩形，以及可讀性預測。此工具封裝 §5.6 的全部演算法。
+* **設計理由**：重構決策分為兩層——**編輯意圖**（用哪種視覺語言）由 LLM 決定，**幾何細節**（裁哪裡、切幾段）是確定性計算，不該讓 LLM 猜。本工具承擔後者，並把可讀性預測回饋給 LLM 作為選模式的依據。
+* **輸入參數 (Input Schema)**：
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "source_file":  { "type": "string" },
+    "source_start": { "type": "number", "default": 0.0 },
+    "duration":     { "type": "number", "description": "欲評估的區段長度（秒）" },
+    "mode": {
+      "type": "string",
+      "enum": ["auto", "fit_height_crop", "region_pan", "blur_padding", "center_crop", "ken_burns_zoom"],
+      "default": "auto",
+      "description": "auto 依 §5.6 的素材分類與可讀性預算自動選擇"
+    },
+    "beat_timestamps": {
+      "type": "array",
+      "items": { "type": "number" },
+      "description": "供分段邊界吸附使用（§5.2）。省略則分段邊界不吸附。"
+    },
+    "region_hint": {
+      "type": "string",
+      "enum": ["auto", "left", "center", "right", "top", "bottom"],
+      "default": "auto",
+      "description": "mode 為 region_pan 時，LLM 可據縮圖內容指定關注區域，覆寫活動熱區推定"
+    }
+  },
+  "required": ["source_file", "duration"]
+}
+```
+
+* **輸出結果**：
+
+```json
+{
+  "chosen_mode": "region_pan",
+  "content_class": "screen_recording",
+  "source_size": { "w": 1920, "h": 1080 },
+  "segments": [
+    {
+      "start_offset": 0.0,
+      "duration": 3.28,
+      "crop": { "x": 210, "y": 48, "w": 608, "h": 1032 },
+      "predicted_text_height_px": 33.8,
+      "legibility": "marginal",
+      "activity_coverage": 0.94
+    },
+    {
+      "start_offset": 3.28,
+      "duration": 2.81,
+      "crop": { "x": 1120, "y": 48, "w": 608, "h": 1032 },
+      "predicted_text_height_px": 33.8,
+      "legibility": "marginal",
+      "activity_coverage": 0.89
+    }
+  ],
+  "warnings": [
+    {
+      "code": "LEGIBILITY_MARGINAL",
+      "message": "預測輸出字高 33.8px，低於舒適門檻 40px。",
+      "suggestion": "若原始錄製解析度可控，建議以較大的 UI 縮放比重新錄製。"
+    }
+  ]
+}
+```
+
+* **規範**：
+  * `segments` 的時長總和**必須**等於輸入 `duration`（EDL 不變式 I-8）。
+  * `activity_coverage` 為該段裁切矩形涵蓋活動熱區能量的比例，低於 `[reframe] min_activity_coverage` 時須產生警告。
+  * 可讀性與活動涵蓋率衝突時（§5.6.6 步驟 3），依 `[reframe] on_legibility_conflict` 設定決定取捨，並**必定**產生警告——不得靜默取捨。
+  * 本工具為**純計算**，不產生任何媒體檔案。
+
 ---
 
 ## 5. 核心演算法與資料模型 (Data Models & Core Logic)
@@ -633,7 +774,7 @@ LLM 透過 System Prompt 約束，必須輸出符合下列 Pydantic 規範的 JS
   "properties": {
     "edl_version": {
       "type": "string",
-      "const": "1.1",
+      "const": "1.2",
       "description": "EDL Schema 版本，供未來遷移使用"
     },
     "project_name": { "type": "string" },
@@ -677,7 +818,49 @@ LLM 透過 System Prompt 約束，必須輸出符合下列 Pydantic 規範的 JS
           },
           "reframe_mode": {
             "type": "string",
-            "enum": ["blur_padding", "center_crop", "ken_burns_zoom"]
+            "enum": [
+              "auto",
+              "fit_height_crop",
+              "region_pan",
+              "blur_padding",
+              "center_crop",
+              "ken_burns_zoom"
+            ],
+            "default": "auto",
+            "description": "編輯意圖層。auto 由 plan_reframe (§4.8) 依素材分類與可讀性預算決定。v1.x 保留 stacked_context / auto_track。"
+          },
+          "region_hint": {
+            "type": "string",
+            "enum": ["auto", "left", "center", "right", "top", "bottom"],
+            "default": "auto",
+            "description": "reframe_mode 為 region_pan 時，LLM 可據縮圖指定關注區域"
+          },
+          "reframe_plan": {
+            "type": "object",
+            "description": "幾何細節層，由 plan_reframe (§4.8) 計算填入。LLM 不應自行撰寫；缺省時渲染階段即時計算。",
+            "properties": {
+              "segments": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "start_offset": { "type": "number", "description": "相對本 clip 起點的秒數" },
+                    "duration":     { "type": "number" },
+                    "crop": {
+                      "type": "object",
+                      "properties": {
+                        "x": { "type": "integer" }, "y": { "type": "integer" },
+                        "w": { "type": "integer" }, "h": { "type": "integer" }
+                      },
+                      "required": ["x", "y", "w", "h"]
+                    }
+                  },
+                  "required": ["start_offset", "duration", "crop"]
+                }
+              }
+            },
+            "required": ["segments"]
           },
           "transition": {
             "type": "string",
@@ -712,6 +895,7 @@ LLM 透過 System Prompt 約束，必須輸出符合下列 Pydantic 規範的 JS
 | I-5 | `Σ duration ≤ 60 秒`（短影音平台上限） | `EDL_TIMELINE_EXCEEDS_AUDIO` |
 | I-6 | 每個 `duration ≥ 0.35 秒`（低於此值人眼無法辨識內容） | `EDL_SCHEMA_INVALID` |
 | I-7 | `source_type == "image"` 時 `source_start` 必須為 0 | `EDL_SCHEMA_INVALID` |
+| I-8 | 若存在 `reframe_plan`：各 segment 的 `duration` 總和 == 該 clip 的 `duration`（容差 1 幀）；且各 `crop` 矩形完全落在素材畫面範圍內、寬高為偶數 | `EDL_SCHEMA_INVALID` |
 
 ### 5.2 節拍吸附演算法 (Beat Snapping Logic)
 
@@ -879,6 +1063,186 @@ ffmpeg -hide_banner -f concat -safe 0 -i concat_list.txt \
 
 視訊層 `-c:v copy` 為純封裝拷貝，記憶體消耗恆定；僅音訊需編碼，成本可忽略。
 
+### 5.6 素材預處理與內容感知重構 (Content-Aware Reframing)（v1.2 新增）
+
+#### 5.6.1 問題陳述
+
+v1.1 定義的三種 `reframe_mode` 是為**自然影片**（人物、風景、生活紀錄）設計的。當素材是**螢幕錄影**（軟體教學、程式碼演示、簡報錄製）時，三者全部失效：
+
+| 模式 | 對螢幕錄影的失效原因 |
+| :---- | :---- |
+| `blur_padding` | 16:9 內容置入 1080 寬後只剩 1080×608，UI 文字縮到原始的 56%，**低於可讀門檻**。畫面 68% 的面積用來顯示模糊背景。 |
+| `center_crop` | 字級沒問題，但盲取中央 31.6% 的寬度。螢幕錄影的重點（終端機、側欄、游標、對話框）在畫面何處**沒有先驗分布**，中央往往是空白編輯區。 |
+| 強制壓縮至 9:16 | 幾何變形，任何情況下都不可接受。 |
+
+這不是美學偏好問題，而是可以精確計算的幾何約束。以下先建立量化模型。
+
+#### 5.6.2 可讀性預算模型 (Legibility Budget)
+
+**定義**：$\varphi = h_{\text{src}} / H_{\text{src}}$，即原始文字高度佔原始畫面高度的比例。此為無因次量，**與錄製解析度無關**——同一份 IDE 畫面錄成 1080p 或 4K，$\varphi$ 相同。
+
+**模式一：滿寬置入（不裁切）** — 對應 `blur_padding`
+
+$$s = \frac{W_{\text{out}}}{W_{\text{src}}}, \qquad h_{\text{out}} = \varphi \cdot H_{\text{src}} \cdot \frac{W_{\text{out}}}{W_{\text{src}}} = \varphi \cdot W_{\text{out}} \cdot \frac{H_{\text{src}}}{W_{\text{src}}}$$
+
+對 16:9 來源、$W_{\text{out}} = 1080$：$\;h_{\text{out}} = \varphi \cdot 1080 \cdot \frac{9}{16} = \boxed{\varphi \cdot 607.5}$
+
+**模式二：裁切至與目標窗格同比例後填滿** — 對應 `fit_height_crop` / `region_pan`
+
+設裁切高度佔比 $z = H_{\text{crop}} / H_{\text{src}}$，裁切寬 $W_{\text{crop}} = H_{\text{crop}} \cdot (W_{\text{pane}}/H_{\text{pane}})$：
+
+$$s = \frac{W_{\text{pane}}}{W_{\text{crop}}} = \frac{H_{\text{pane}}}{z \cdot H_{\text{src}}}, \qquad h_{\text{out}} = \varphi \cdot H_{\text{src}} \cdot \frac{H_{\text{pane}}}{z \cdot H_{\text{src}}} = \boxed{\frac{\varphi \cdot H_{\text{pane}}}{z}}$$
+
+**兩式的 $H_{\text{src}}$ 都被消掉了**——輸出字高只由 $\varphi$、目標窗格尺寸與裁切比例決定。提高錄製解析度**無法**改善可讀性。
+
+**可讀門檻**（1080×1920 於手機觀看）：
+
+* $h_{\min} = 28$ px（勉強可讀）
+* $h_{\text{comfy}} = 40$ px（舒適）
+
+推導：1080 寬影片於 6.1 吋手機（可視寬約 71 mm），28px 對應 $28/1080 \times 71 \approx 1.84$ mm 字高；於 30 cm 觀看距離張角約 21 弧分，接近一般認為的舒適閱讀下限（x-height ≥ 20 弧分）。
+
+> ⚠️ 此門檻為依觀看幾何推導的**工程估計值**，須以真實素材做主觀驗證（§10 M1 校準工作項）。
+
+**典型 $\varphi$ 值（待校準）**
+
+| 內容類型 | $\varphi$ |
+| :---- | :---- |
+| 終端機 12pt @ 100% 縮放 | 0.0148 |
+| IDE 程式碼 14pt @ 100% 縮放 | 0.0176 |
+| 瀏覽器內文 16px CSS | 0.0194 |
+| 簡報內文 | 0.0320 |
+| 簡報標題 | 0.0560 |
+
+**結論表**（以 IDE 程式碼 $\varphi = 0.0176$ 為基準）
+
+| 重構方式 | 公式 | $h_{\text{out}}$ | 判定 | 可見原始畫面面積 |
+| :---- | :---- | :---- | :---- | :---- |
+| 滿寬 letterbox (`blur_padding`) | $\varphi \times 607.5$ | **10.7 px** | ❌ FAIL | 100% |
+| 滿高 9:16 裁切 ($z=1.0$) | $\varphi \times 1920$ | **33.8 px** | ⚠️ MARGINAL | 31.6% |
+| 60% 高緊裁切 ($z=0.6$) | $\varphi \times 3200$ | **56.3 px** | ✅ OK | 11.4% |
+
+**核心取捨**：滿寬 letterbox 與滿高裁切的字級比為 $1920 / 607.5 = 3.16$ 倍。
+
+> **要讓一般 UI 文字在短影音中可讀，必須放棄約 68% 的畫面內容。這個代價無法迴避。**
+>
+> 因此系統的價值不在於「避免裁切」，而在於**裁對地方**——這正是後續 §5.6.3 ~ §5.6.6 要解決的問題。
+
+#### 5.6.3 素材分類 (Source Classification)
+
+在 §4.3 已抽出的縮圖上計算，額外成本低（無須重新解碼原始素材）。
+
+| 訊號 | 定義 | 螢幕錄影方向 | 合成樣本實測 | 門檻 |
+| :---- | :---- | :---- | :---- | :---- |
+| **軸向邊緣佔比** | Sobel 梯度方向落在水平／垂直 ±8° 內的邊緣像素比例（取梯度強度前 8% 為邊緣） | 高 | 螢幕 **0.486** / 自然 **0.176** | **TBD-待校準** |
+| **色彩稀疏度** | 5-bit 量化後最常見 16 色所佔的像素比例 | 高 | 螢幕 **1.000** / 自然 **0.733** | **TBD-待校準** |
+| **時間靜止率** | 相鄰抽樣幀間差異 < 2/255 的像素比例 | 高 | 未測 | **TBD-待校準** |
+| **文字區塊密度** | MSER 穩定區中符合文字長寬比與高度一致性的連通元件密度 | 高 | 未測 | **TBD-待校準** |
+
+**校準狀態說明**：上表「合成樣本實測」為以程式合成的 UI 圖與自然影像圖跑出的方向性檢查，**僅驗證訊號方向正確，不足以定門檻**。實測顯示：
+
+* **軸向邊緣佔比**是最強訊號（區隔度 64%），但螢幕樣本實測值 0.486 遠低於直覺假設的 0.60——**若照直覺寫死門檻會全部誤判**。這正是必須用真實語料校準的證據。
+* **色彩稀疏度**區隔度僅 27%，僅可作輔助訊號，不可單獨判定。
+
+**已排除的訊號**：**雜訊底噪**（平坦區高頻能量）。原假設「螢幕擷取無感光元件雜訊」方向正確，但實測在無雜訊內容上數值退化為 `NaN`，且經視訊壓縮重編碼後會被壓縮雜訊汙染。判別力不可靠，**不納入實作**。
+
+**輸出分類**：`natural` / `screen_recording` / `slideshow` / `mixed` / `unknown`。
+
+**誤判代價不對稱**：自然影片被誤判為螢幕錄影，結果是套用滿高裁切——視覺上仍可接受；螢幕錄影被誤判為自然影片，結果是套用 letterbox——**內容完全不可讀**。因此分類器應偏向提高 `screen_recording` 的召回率（recall），寧可誤報。信心值低於門檻時輸出 `unknown` 並交由 LLM 或使用者指定。
+
+#### 5.6.4 活動熱區偵測 (Activity Heatmap)
+
+螢幕錄影的「重點在哪」**不能**使用自然影像的顯著性（saliency）模型——那些模型訓練於自然照片，對 UI 版面無效。改用**變化量**作為代理指標：
+
+> 螢幕錄影中會動的地方，就是使用者正在操作的地方。
+
+**演算法**
+
+1. 以 FFmpeg 抽出 `fps=2`、寬 128 px 的灰階序列（成本極低，符合 §2.2 抽樣降規隔離）。
+2. 計算相鄰幀絕對差 $D_t = |F_t - F_{t-1}|$。
+3. 對每個時間窗 $w$（預設 2 秒）累積 $H_w = \sum_{t \in w} D_t$，再做 $5 \times 5$ 高斯平滑。
+4. 取 $H_w$ 的 85 百分位以上區域，計算能量加權質心 $(c_x, c_y)$ 與涵蓋 80% 能量的最小外接矩形。
+
+**輸出**：時間 → 活動矩形的序列。
+
+**降級路徑**：若全片活動量低於 `[reframe] min_activity_energy`（純靜態畫面，如靜止的簡報），無法推定重點區域，退回 `blur_padding` 並在 §4.8 輸出中標示 `activity: "static"`。
+
+**已知干擾源**（見風險 R-12）：影片播放器、動畫廣告、閃爍游標會製造與內容無關的活動。緩解方向為週期性偵測（游標閃爍有固定頻率，可用時間序列自相關濾除）與面積上限（活動矩形面積超過畫面 70% 時視為無效推定）。
+
+#### 5.6.5 分段靜態裁切 (Piecewise-Static Crop) — v1.0 採用方案
+
+將一支素材依活動熱區的變化切成 $N$ 個時間段，每段使用一個**固定**裁切矩形，段落邊界吸附至節拍點（§5.2）。
+
+> **架構關鍵：此方案不需要渲染層新增任何機制。**
+>
+> 每一段就是 Chunked Pipeline 的一個 chunk——現有管線（§5.5）原生支援，差別只在 `crop` 參數不同。所謂「一支素材切成三段」，在渲染層就是三個 chunk，與 EDL 本來就有三個 clip 沒有任何區別。
+
+相對於逐幀平移追蹤（`auto_track`），此方案：
+
+* 免除時間序列平滑、死區、速度限制等全部複雜度
+* 免除逐幀 `crop` 表達式，濾鏡鏈仍是靜態字串
+* 段落切換落在節拍上，**把幾何限制轉化為剪輯節奏**——與本專案的卡點核心天然契合
+
+**分段演算法**
+
+1. 對活動矩形序列做時間分割：當新窗格質心與當前段落質心的距離超過畫面寬度的 `segment_threshold`（預設 15%）時，開啟新段。
+2. 合併時長 < `min_clip_duration`（0.35 s，不變式 I-6）的碎段至相鄰段。
+3. 每段的裁切矩形 = 該段內所有活動矩形的**聯集**，再依 §5.6.6 擴張至目標比例並夾制於畫面邊界。
+4. 段落邊界送入 §5.2 節拍吸附。
+
+**對既有量化模型的影響**
+
+* **記憶體（§5.4）**：無影響。chunk 仍為序列處理，$M_{\text{peak}}$ 不變。
+* **渲染時間（驗收 A-6）**：分段會提高 chunk 總數，每個 chunk 各有一次子進程啟動與編碼器初始化成本（實測前估約 0.3–0.8 s／chunk）。實作須設 `max_segments_per_clip` 上限，避免活動頻繁的素材被切成數十段而拖垮 A-6。此上限的實際值待 M1 benchmark 後填入。
+* **磁碟（§3.1）**：中間切片總量不變（總時長不變），僅檔案數增加。
+
+#### 5.6.6 裁切矩形的推導與夾制
+
+給定活動矩形 $(a_x, a_y, a_w, a_h)$、目標窗格比 $r = W_{\text{pane}}/H_{\text{pane}}$：
+
+1. **內容需求高度**（至少涵蓋活動區）
+   $$h_{\text{need}} = \max\left(a_h,\; \frac{a_w}{r}\right) \times (1 + \text{padding}) \qquad \text{padding 預設 } 0.12$$
+
+2. **可讀性允許的最大高度**（由 §5.6.2 的 $h_{\text{out}} = \varphi H_{\text{pane}} / z$ 反解 $z$）
+   $$h_{\text{read}} = \frac{\varphi \cdot H_{\text{pane}}}{h_{\min}} \cdot H_{\text{src}}$$
+
+3. **衝突判定**：$h_{\text{need}}$ 是下限、$h_{\text{read}}$ 是上限。若 $h_{\text{need}} > h_{\text{read}}$，**兩者無法同時滿足**——活動區太分散，塞不進可讀的裁切框。此時依 `[reframe] on_legibility_conflict` 取捨：
+   * `prefer_coverage`（v1.0 預設）：取 $H_{\text{crop}} = h_{\text{need}}$，涵蓋完整活動區但字會偏小，**產生 `LEGIBILITY_MARGINAL` 警告**。
+   * `prefer_legibility`：取 $H_{\text{crop}} = h_{\text{read}}$，只裁活動區的主要子區，捨棄邊緣內容，**產生 `ACTIVITY_CLIPPED` 警告**。
+
+   兩種取捨都**必定產生警告**，不得靜默決定。
+
+4. $H_{\text{crop}} = \min(H_{\text{crop}},\; H_{\text{src}})$，$\;W_{\text{crop}} = H_{\text{crop}} \times r$
+5. 以活動質心對齊裁切框中心，再夾制於 $[0,\, W_{\text{src}} - W_{\text{crop}}] \times [0,\, H_{\text{src}} - H_{\text{crop}}]$
+6. 全部座標與尺寸對齊至**偶數像素**（yuv420p 編碼器要求）
+
+#### 5.6.7 前處理正規化
+
+除內容感知重構外，前處理階段還須處理：
+
+| 項目 | 方法 | 理由 |
+| :---- | :---- | :---- |
+| 靜態黑邊／信箱框剝除 | FFmpeg `cropdetect=limit=24:round=2`，取樣前 10 秒 | 螢幕錄影常含錄製區域外的黑邊；不剝除等於白白浪費可讀性預算 |
+| 旋轉旗標校正 | 讀取 `ffprobe` 的 `side_data` rotation | §4.3 已規範 |
+| 分析代理解析度 | 熱區與分類分析一律在 ≤ 720p 代理上進行 | 不需原生解析度，符合 §2.2 抽樣降規隔離 |
+| 固定 UI 區域排除 | 由活動熱區中「長期零變化」的邊緣帶推得（工作列、瀏覽器分頁列） | 這些區域佔空間但無資訊，應排除於活動矩形之外 |
+
+> **規範：前處理不重寫原始素材。** 全部結果以中繼資料（裁切矩形、分段表）形式傳遞，於渲染時併入濾鏡鏈。重寫來源會使磁碟用量倍增並造成世代損失（generation loss）。
+
+#### 5.6.8 濾鏡鏈
+
+`fit_height_crop` / `region_pan`（單一 chunk 內恆為靜態裁切）：
+
+```
+[0:v]crop=<cw>:<ch>:<cx>:<cy>,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[outv]
+```
+
+若須剝除靜態黑邊，於最前方再串接一次 `crop`。因裁切框已依 §5.6.6 步驟 4 校正為目標比例，尾端的 `scale` + `crop` 實際上只做縮放，第二個 `crop` 僅用於吸收奇偶數捨入誤差。
+
+`auto` 模式由 §4.8 決定實際落點：判為 `screen_recording` 走上式；判為 `natural` 或活動偵測失敗則退回 §5.3.1 的 `blur_padding`。
+
+> ⚠️ **本節與 §5.3 的所有濾鏡鏈尚未經實機驗證**——開發機目前未安裝 FFmpeg（§3.4）。M1 的第一項工作即為逐一驗證這些濾鏡鏈可執行且輸出正確。
+
 ---
 
 ## 6. 設定管理 (Configuration Management)
@@ -917,6 +1281,32 @@ fps    = 30
 max_total_duration = 60.0    # 不變式 I-5
 min_clip_duration  = 0.35    # 不變式 I-6 / §5.2 c_min
 sample_max_frames  = 8       # §4.3，硬上限 12
+
+[reframe]                              # §5.6 內容感知重構
+# --- 可讀性門檻（§5.6.2）---
+min_text_height_px      = 28           # h_min，勉強可讀
+comfy_text_height_px    = 40           # h_comfy，舒適
+# --- 分類器門檻（§5.6.3）---
+# 下列數值全部為 TBD，必須以真實語料校準後填入。
+# 預設 -1 代表未校準：實作須拒絕啟動自動分類並要求使用者顯式指定素材類型。
+classify_axis_edge_threshold  = -1     # 合成樣本參考值 ~0.35，未經真實語料驗證
+classify_sparsity_threshold   = -1     # 區隔力弱，僅作輔助訊號
+classify_static_threshold     = -1
+classify_min_confidence       = 0.70   # 低於此值輸出 unknown
+# --- 活動熱區（§5.6.4）---
+activity_fps            = 2
+activity_probe_width    = 128
+activity_window_sec     = 2.0
+activity_percentile     = 85
+min_activity_energy     = 0.02         # 低於此值視為靜態畫面，退回 blur_padding
+max_activity_area_ratio = 0.70         # 活動矩形超過此比例視為無效推定
+# --- 分段與裁切（§5.6.5 / §5.6.6）---
+segment_threshold       = 0.15         # 質心位移超過畫面寬度此比例則分段
+crop_padding            = 0.12         # 活動區外擴呼吸空間
+min_activity_coverage   = 0.85         # 低於此值產生警告
+on_legibility_conflict  = "prefer_coverage"   # prefer_coverage | prefer_legibility
+# --- 前處理（§5.6.7）---
+strip_static_border     = true
 
 [capcut]
 draft_root = ""              # 留空則自動偵測安裝路徑
@@ -961,6 +1351,14 @@ AutoShorts_MCP/
 │   │   ├── prober.py            # Tool 3  §4.3
 │   │   └── sampler.py           # 縮圖抽樣
 │   │
+│   ├── preprocess/              # §5.6 素材預處理與內容感知重構
+│   │   ├── classifier.py        # §5.6.3 素材分類
+│   │   ├── activity.py          # §5.6.4 活動熱區偵測
+│   │   ├── legibility.py        # §5.6.2 可讀性預算模型
+│   │   ├── segmenter.py         # §5.6.5 分段靜態裁切
+│   │   ├── cropbox.py           # §5.6.6 裁切矩形推導與夾制
+│   │   └── planner.py           # Tool 7  §4.8
+│   │
 │   ├── edl/
 │   │   ├── models.py            # §5.1 Pydantic 模型與不變式驗證
 │   │   └── snapper.py           # §5.2 節拍吸附
@@ -990,7 +1388,11 @@ AutoShorts_MCP/
 │
 ├── scripts/
 │   ├── check_env.py             # 環境自檢（FFmpeg / 編碼器 / Python 版本）
-│   └── make_fixtures.py         # 產生測試素材
+│   ├── make_fixtures.py         # 產生測試素材
+│   └── calibrate_classifier.py  # §5.6.3 以標註語料校準分類器門檻
+│
+├── calibration/                 # 分類器校準語料（標註清單進版控，媒體檔不進）
+│   └── labels.csv               # 檔名, content_class, phi, 備註
 │
 └── workspace/                   # 執行期產物，已 gitignore
     ├── audio/
@@ -1011,7 +1413,7 @@ AutoShorts_MCP/
 | :---- | :---- | :---- | :---- |
 | **單元測試** | 純函式邏輯：節拍吸附、EDL 驗證、濾鏡字串組裝、錯誤碼映射 | `pytest` | 每次提交 |
 | **整合測試** | 對合成素材實際呼叫 FFmpeg，驗證輸出規格 | `pytest` + FFmpeg | 每次 PR |
-| **MCP 協定測試** | 以 MCP Client 連線，驗證六個工具的 Schema 與錯誤回傳 | MCP SDK 測試工具 | 每次 PR |
+| **MCP 協定測試** | 以 MCP Client 連線，驗證七個工具的 Schema 與錯誤回傳 | MCP SDK 測試工具 | 每次 PR |
 | **端到端測試** | 完整流程：素材 → LLM → EDL → 雙軌輸出 | 手動 + 腳本 | 版本階梯節點 |
 
 ### 8.2 測試素材策略
@@ -1032,6 +1434,8 @@ ffmpeg -f lavfi -i "sine=frequency=440:duration=0.05" \
 
 已知 BPM 的合成音訊讓節拍偵測的正確性成為**可斷言**的測試，而非主觀判斷。
 
+**§5.6 分類器的例外**：合成樣本足以驗證訊號**方向**（見 T-11），但**不足以定門檻**——實測已證實照直覺假設的門檻會全部誤判（§5.6.3）。分類器門檻必須以真實語料校準，語料本身不進版控，僅 `calibration/labels.csv` 標註清單進版控。
+
 ### 8.3 關鍵測試案例
 
 | 編號 | 案例 | 斷言 |
@@ -1046,6 +1450,11 @@ ffmpeg -f lavfi -i "sine=frequency=440:duration=0.05" \
 | T-08 | 記憶體熔斷 | 將 `memory_limit_mb` 調至極低值，驗證熔斷器確實觸發並回報實測值 |
 | T-09 | 損毀素材容錯 | 目錄含損毀檔案時，列入 `skipped` 並完成其餘素材處理 |
 | T-10 | 音訊下載失敗降級 | 模擬下載阻擋 → 回傳 `AUDIO_DOWNLOAD_BLOCKED` 並含本機檔案的 `remediation` 指引 |
+| T-11 | 分類器訊號方向性 | 合成 UI 圖與自然影像圖，斷言 `axis_edge_ratio(UI) > axis_edge_ratio(natural)`。**僅驗方向，不驗門檻** |
+| T-12 | 可讀性恆等式 | 對隨機 φ、z、來源解析度，斷言 `h_out == φ × H_pane / z`，且結果與 `H_src` 無關（誤差 < 0.01px） |
+| T-13 | 裁切矩形夾制 | 活動區貼齊畫面四角與四邊時，輸出 crop 完全落在畫面內、寬高為偶數、比例等於 9:16（誤差 < 1px） |
+| T-14 | 分段與吸附 | 碎段（< 0.35s）確實被合併；所有段落邊界落在 beat_timestamps 上；段長總和 == clip 時長（不變式 I-8） |
+| T-15 | 可讀性衝突 | 構造 `h_need > h_read` 的活動區，斷言必定產生 `LEGIBILITY_MARGINAL` 或 `ACTIVITY_CLIPPED` 警告，**不得靜默取捨** |
 
 ### 8.4 MVP (v1.0) 驗收標準
 
@@ -1061,6 +1470,7 @@ ffmpeg -f lavfi -i "sine=frequency=440:duration=0.05" \
 | **A-6** | **渲染效能** | 60 秒成品在 §3.4 基準機上，啟用硬體編碼的渲染時間 ≤ 90 秒 |
 | **A-7** | **錯誤處理** | §8.3 全部 10 條測試案例通過 |
 | **A-8** | **可安裝性** | 於一台乾淨的 Windows 11 機器，依 README 指引完成安裝並跑通一次流程，耗時 ≤ 30 分鐘 |
+| **A-9** | **螢幕錄影可讀性** | 以 3 支真實螢幕錄影素材測試：① 分類器正確判為 `screen_recording`；② 重構後主要文字的實測輸出字高 **≥ 28 px**；③ 裁切框對活動熱區的涵蓋率 **≥ 85%**；④ 人工目視確認未裁掉關鍵 UI 元素 |
 
 ---
 
@@ -1077,6 +1487,9 @@ ffmpeg -f lavfi -i "sine=frequency=440:duration=0.05" \
 | **R-07** | **重拍偵測不準確**（v1.1 新增） | 中 | librosa **不具備原生 downbeat 偵測能力**，v1.0 規格列出 `downbeats` 欄位卻無實作依據。 | v1.0 採 `infer_4_4` 推定策略並在輸出中以 `downbeat_confidence: "inferred"` 誠實標示（§4.2）。段落級轉場才使用 downbeat，一般切點使用 beat，降低推定錯誤的影響。真實偵測（madmom）列為 v1.x 候選。 |
 | **R-08** | **音樂版權與服務條款合規**（v1.1 新增） | 中 | 自動下載線上音訊可能違反平台服務條款；使用受版權保護的音樂會導致成品被平台下架或消音。 | ① `download_music` 首次使用時顯示合規提醒（§4.1）；② README 明確聲明使用者為素材合法性的唯一責任方；③ 文件中優先推薦使用者提供自有或授權音訊；④ 不內建任何規避 Bot 驗證的機制。詳見 §11.3。 |
 | **R-09** | **LLM 輸出不符 Schema**（v1.1 新增） | 中 | 模型未支援約束解碼，或在長素材清單下產生幻覺檔名。 | §2.3.3 Schema 修復迴圈（上限 3 次）；不變式 I-2 強制檢查 `source_file` 存在性；重試耗盡則回傳 `EDL_SCHEMA_INVALID`，不輸出半成品。 |
+| **R-11** | **素材誤分類**（v1.2 新增） | 中 | §5.6.3 分類器在未見過的素材型態上判斷錯誤（如深色主題 IDE、遊戲畫面、含大量 UI 疊層的 vlog）。 | **誤判代價不對稱**：自然影片誤判為螢幕錄影 → 套用滿高裁切，視覺仍可接受；螢幕錄影誤判為自然影片 → 套用 letterbox，**內容完全不可讀**。故分類器刻意偏向提高 `screen_recording` 召回率。信心值低於 `classify_min_confidence` 時輸出 `unknown`；CLI 提供 `--content-class` 強制覆寫。 |
+| **R-12** | **活動熱區誤導**（v1.2 新增） | 中 | 影片播放器、動畫廣告、閃爍的文字游標會製造與內容無關的高活動量，把裁切框吸引到錯誤位置。 | ① 週期性偵測——游標閃爍有固定頻率，以時間序列自相關濾除；② 面積上限——活動矩形超過畫面 `max_activity_area_ratio`（0.70）時視為無效推定並退回 `blur_padding`；③ LLM 可透過 `region_hint` 依縮圖內容覆寫推定結果。 |
+| **R-13** | **校準語料不足**（v1.2 新增） | **高** | §5.6.3 的門檻值目前全部為 TBD。合成樣本實測已證實：照直覺假設的門檻（0.60）與實際值（0.486）差距足以造成全面誤判。 | ① 全部門檻集中於 `config.toml` 的 `[reframe]` 區段，預設值 `-1` 代表未校準；**實作在未校準狀態下必須拒絕啟動自動分類**，改要求使用者顯式指定素材類型，而非用猜測值靜默運行；② 語料收集與門檻校準列為 **M1 退出條件**；③ `scripts/calibrate_classifier.py` 自動化校準流程，語料擴充後可重跑。 |
 | **R-10** | **相依套件版本衝突**（v1.1 新增） | 中 | librosa → numba → LLVM 的相依鏈對 Python 版本敏感，新版 Python 常需等待數月支援。 | §3.3 明確標示支援區間為 Python 3.11 – 3.12；`scripts/check_env.py` 於啟動時檢查並在版本不符時給出明確訊息，而非讓使用者面對 numba 的底層編譯錯誤。 |
 
 ---
@@ -1104,20 +1517,26 @@ ffmpeg -f lavfi -i "sine=frequency=440:duration=0.05" \
 - [ ] 封裝 `yt-dlp` 下載與轉碼流程，含 §11.3 合規提醒。
 - [ ] 建立具備 9:16 自適應與動態模糊之獨立片段裁切腳本（§5.3、§5.5）。
 - [ ] 撰寫 `scripts/make_fixtures.py` 與 T-01、T-04、T-05 測試案例。
+- [ ] **【需使用者提供】** 收集校準語料：15–20 支真實素材（螢幕錄影與自然影片各半），填寫 `calibration/labels.csv` 標註 `content_class` 與 `phi`。
+- [ ] 實作 §5.6.3 分類器與 `scripts/calibrate_classifier.py`，以語料算出門檻值填入 `config.example.toml`。
+- [ ] 實作 §5.6.2 可讀性預算模型與 §5.6.4 活動熱區偵測；通過 T-11、T-12。
 
-**M1 退出條件**：三個模組皆可獨立以 CLI 執行；T-01、T-04、T-05 通過。
+**M1 退出條件**：三個核心模組皆可獨立以 CLI 執行；§5.3 與 §5.6.8 全部濾鏡鏈經實機驗證；分類器門檻已用真實語料校準（不再是 `-1`）；T-01、T-04、T-05、T-11、T-12 通過。
 
 ### Milestone 2：MCP Server 與 Agent 協定（v0.3）
 
-- [ ] 基於 Python `mcp` SDK 實作標準 MCP 介面，暴露六個工具（§4）。
+- [ ] 基於 Python `mcp` SDK 實作標準 MCP 介面，暴露七個工具（§4）。
 - [ ] 實作 §4.7 統一錯誤回傳規範與錯誤碼體系。
 - [ ] 實作 §2.3 LLM Provider 抽象層與至少一個具體轉接層。
 - [ ] 設計 System Prompt，使模型能正確讀取素材縮圖並輸出符合 Schema 的 EDL。
 - [ ] 實作 §5.1 Pydantic 模型與不變式 I-1 ~ I-7 驗證。
 - [ ] 實作 §5.2 節拍吸附後處理器（Beat Snapper）。
 - [ ] 實作 Tool 6 `probe_system_capabilities`（§4.6）。
+- [ ] 實作 §5.6.5 分段器與 §5.6.6 裁切矩形推導；通過 T-13、T-14、T-15。
+- [ ] 實作 Tool 7 `plan_reframe`（§4.8），串接分類器、熱區偵測與分段器。
+- [ ] System Prompt 補上重構模式的選用指引，使 LLM 能依 `content_analysis` 決定 `reframe_mode`。
 
-**M2 退出條件**：MCP Client 可連線並成功呼叫全部六個工具；T-02、T-03、T-09、T-10 通過。
+**M2 退出條件**：MCP Client 可連線並成功呼叫全部**七**個工具；T-02、T-03、T-09、T-10、T-13、T-14、T-15 通過。
 
 ### Milestone 3：雙軌輸出引擎實作（v0.4 / v0.5）
 
@@ -1141,12 +1560,13 @@ ffmpeg -f lavfi -i "sine=frequency=440:duration=0.05" \
 - [ ] 以 10 支 4K 橫式生活影片與 1 首 128 BPM 音樂進行端到端全自動測試（驗收 A-1）。
 - [ ] 驗證長時間執行之記憶體穩定度（驗收 A-2）。
 - [ ] 量測音畫同步偏差與渲染效能（驗收 A-3、A-6）。
+- [ ] 以真實螢幕錄影驗證內容感知重構（驗收 A-9）。
 - [ ] 撰寫一鍵啟動腳本與簡易使用者指引（驗收 A-8）。
 - [ ] 於乾淨機器執行安裝驗證。
 - [ ] 確定專案授權條款並補上 `LICENSE`（附錄 A-1）。
 - [ ] 打上 `AutoShorts_MCP_v1.0` tag。
 
-**M4 退出條件**：§8.4 全部 8 項驗收標準通過。
+**M4 退出條件**：§8.4 全部 9 項驗收標準通過。
 
 ---
 
@@ -1195,3 +1615,6 @@ ffmpeg -f lavfi -i "sine=frequency=440:duration=0.05" \
 | **A-5** | **Web UI 是否納入 v1.0**：§2.1 架構圖列出「Web 輕量操控面板」，但 §10 里程碑中未見對應工作項。 | 若納入需增加一個里程碑 | M2 前 |
 | **A-6** | **公式語意確認**：原 v1.0 §3.1、§5.2 的兩張 base64 公式圖片無法閱讀，已於 §5.4、§5.2 依上下文重建為文字定義。**需原作者確認語意是否一致。** | 影響核心演算法正確性 | M2 前（Beat Snapper 實作前） |
 | **A-7** | **成品時長上限**：不變式 I-5 設為 60 秒。但 YouTube Shorts 已放寬至 3 分鐘，是否放寬？ | 影響 EDL 驗證與記憶體模型 | M2 前 |
+| **A-8** | **校準語料規模與涵蓋面**：15–20 支是否足夠？是否需涵蓋深色／淺色主題、不同 UI 縮放比、遊戲畫面等邊界情境？ | 直接決定 R-13 的殘餘風險 | M1 開始前 |
+| **A-9** | **`stacked_context` 與 `auto_track` 的排程**：兩者已排除於 v1.0（§1.3）。`stacked_context`（上下雙窗格）能同時保留上下文與可讀性，是螢幕錄影的強方案，但需新增雙層 overlay 濾鏡鏈與窗格配置。是否列為 v1.1 首要項目？ | 影響螢幕錄影類素材的成品品質上限 | v1.0 驗收後 |
+| **A-10** | **文字高度估計（φ）的取得方式**：目前規劃以 MSER 連通元件估計。是否值得改用輕量文字偵測模型以提高準確度？代價是新增模型權重相依。 | 影響可讀性預算的可信度 | M1 校準時一併評估 |
