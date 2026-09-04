@@ -44,3 +44,6 @@ tests/fixtures/*.png
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# ---- Spike 產出 ----
+tests/fixtures/
