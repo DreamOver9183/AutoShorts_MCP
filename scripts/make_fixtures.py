@@ -86,6 +86,38 @@ def make_beat_audio(ff, out, bpm=120, dur=60):
     ])
 
 
+def make_accented_beat_audio(ff, out, bpm=120, dur=60, meter=4):
+    """帶重音的節拍音訊：每 meter 拍一次強拍，其餘為弱拍。
+
+    用途：驗證 §5.2.1 起音能量加權是否真能把切點吸向重拍。
+    等強度的 beat_120bpm.wav 無法測出加權效果（所有拍能量相同）。
+    強拍為 1200Hz 全振幅，弱拍為 900Hz 且衰減至 0.25。
+    """
+    beat_s = 60.0 / bpm
+    click, gap = 0.05, beat_s - 0.05
+    n_bars = int(dur / (beat_s * meter))
+    # 一個小節 = 1 強拍 + (meter-1) 弱拍
+    inputs, parts = [], []
+    inputs += ["-f", "lavfi", "-i", "sine=frequency=1200:duration={}".format(click)]
+    inputs += ["-f", "lavfi", "-i", "sine=frequency=900:duration={}".format(click)]
+    inputs += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo:d={}".format(gap)]
+    fc = ("[0:a]aformat=sample_rates=44100:channel_layouts=stereo,volume=1.0[strong];"
+          "[1:a]aformat=sample_rates=44100:channel_layouts=stereo,volume=0.25[weak];"
+          "[2:a]aformat=sample_rates=44100:channel_layouts=stereo[sil];"
+          "[strong]asplit=1[s0];[weak]asplit={}[{}];".format(
+              meter - 1, "][".join("w{}".format(i) for i in range(meter - 1))))
+    fc += "[sil]asplit={}[{}];".format(meter, "][".join("g{}".format(i) for i in range(meter)))
+    seq = "[s0][g0]"
+    for i in range(meter - 1):
+        seq += "[w{}][g{}]".format(i, i + 1)
+    fc += "{}concat=n={}:v=0:a=1[bar];".format(seq, meter * 2)
+    fc += "[bar]aloop=loop={}:size={}[out]".format(
+        n_bars, int(44100 * beat_s * meter))
+    return run([ff, "-hide_banner", "-loglevel", "error", "-y"] + inputs +
+               ["-filter_complex", fc, "-map", "[out]", "-t", str(dur),
+                "-c:a", "pcm_s16le", "-ar", "44100", out])
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--outdir", default=os.path.join("tests", "fixtures"))
@@ -127,6 +159,15 @@ def main():
         ok = make_beat_audio(ff, out)
         print("  {} {:<28} 120 BPM，節拍偵測的可斷言真值".format(
             "建立" if ok else "失敗", "beat_120bpm.wav"))
+        made += ok; failed += (not ok)
+
+    out = target("beat_120bpm_accented.wav")
+    if os.path.exists(out) and not args.force:
+        print("  跳過（已存在） beat_120bpm_accented.wav"); skipped += 1
+    else:
+        ok = make_accented_beat_audio(ff, out)
+        print("  {} {:<28} 120 BPM 4/4 帶重音，驗證 §5.2.1 能量加權".format(
+            "建立" if ok else "失敗", "beat_120bpm_accented.wav"))
         made += ok; failed += (not ok)
 
     print("\n建立 {} 個、跳過 {} 個、失敗 {} 個 -> {}".format(
