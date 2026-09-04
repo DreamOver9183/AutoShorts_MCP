@@ -1,0 +1,57 @@
+# AutoShorts-MCP 設定範本（§6）
+# 複製為 config.toml 後修改。機密（API Key）不得寫入此檔，見 §6.3。
+
+[llm]
+provider              = "gemini"   # gemini | claude | openai | local
+model                 = ""         # 具體型號寫在此處，規格不綁定（§2.3）
+temperature           = 0.7
+max_retries           = 3          # §2.3.3 Schema 修復迴圈上限
+thumb_width           = 858        # §4.9.5 LLM 判讀縮圖寬度（360 下模型看不見 UI 文字）
+contact_sheet         = true       # §4.9.4 規避單次請求圖片數上限
+classify_by_llm       = true       # §5.6.3.8
+
+[ffmpeg]
+binary_path  = ""                  # 留空則從 PATH 搜尋
+ffprobe_path = ""
+threads      = 0
+
+[render]
+hw_accel               = "auto"    # §3.2.2 自動偵測；顯式指定但不可用時報錯不靜默降級
+hwaccel_decode_enabled = false     # §3.2.3 FFmpeg 手冊：硬解在現代 CPU 上未必更快
+memory_limit_mb        = 0         # 0 = 自動 min(3072, 0.25*RAM)（§5.4.3）
+keep_temp              = false
+max_segments_per_clip  = 8
+
+[canvas]
+width  = 1080
+height = 1920
+fps    = 30
+
+[beat]
+analysis_sr            = 44100     # §4.2.1 必須顯式指定，勿用 librosa 預設 22050
+hop_length             = 512       # 解析度 11.6ms，佔 A-3 預算 23%
+bpm_from_mean_interval = true      # §4.2.1 不得用 beat_track 的 tempo 標量
+onset_weight_gamma     = 0.3       # §5.2.1；0 = 停用。注意無法替代重拍偵測（R-07）
+
+[edit]
+max_total_duration = 60.0
+min_clip_duration  = 0.35
+sample_max_frames  = 8             # 硬上限 12
+
+[reframe]
+min_text_height_px              = 28
+comfy_text_height_px            = 40
+mser_min_area                   = 15    # §5.6.3.9 不得用函式庫預設 60
+classify_text_density_threshold = 2.96  # §5.6.3.5 共線過濾+去重後實測
+classify_collinear_filter       = true
+classify_min_confidence         = 0.70
+on_legibility_conflict          = "prefer_coverage"
+
+[sampling]
+scene_detect           = true      # §4.3 PySceneDetect，須用 auto_downscale
+scene_detect_on_screen = false     # 螢幕錄影：捲動非切換
+proxy_width            = 360       # 像素分析代理（與 LLM 縮圖分離）
+
+[capcut]
+draft_root = ""
+backend    = "builtin"             # §4.4.2 社群後端待授權釐清

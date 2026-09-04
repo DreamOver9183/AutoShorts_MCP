@@ -47,3 +47,9 @@ desktop.ini
 
 # ---- Spike 產出 ----
 tests/fixtures/
+
+# ---- 建置產物 ----
+*.egg-info/
+src/*.egg-info/
+.pytest_cache/
+capabilities.json
